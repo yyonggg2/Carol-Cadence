@@ -8,19 +8,24 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-deep: #05070a;
+            --bg-sky: #1B2735;
+        }
         body {
             font-family: 'Inter', sans-serif;
-            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+            background: radial-gradient(ellipse at bottom, var(--bg-sky) 0%, var(--bg-deep) 100%);
             color: #f0f0f0;
             overflow-x: hidden;
             min-height: 100vh;
+            margin: 0;
         }
         h1, h2, h3, .serif {
             font-family: 'Crimson Pro', serif;
         }
 
-        /* Snow Animation */
-        .snow-container {
+        /* Christmas Scene Layers */
+        .scene-container {
             position: fixed;
             top: 0;
             left: 0;
@@ -28,6 +33,89 @@
             height: 100%;
             pointer-events: none;
             z-index: 0;
+            overflow: hidden;
+        }
+
+        /* Stars */
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+        }
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.5;
+            animation: twinkle var(--duration) ease-in-out infinite;
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Aurora Borealis */
+        .aurora {
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 255, 128, 0.05), transparent 40%),
+                        radial-gradient(circle at 30% 40%, rgba(0, 128, 255, 0.05), transparent 40%),
+                        radial-gradient(circle at 70% 60%, rgba(255, 215, 0, 0.03), transparent 40%);
+            filter: blur(60px);
+            animation: aurora-drift 20s ease-in-out infinite alternate;
+            opacity: 0.6;
+        }
+        @keyframes aurora-drift {
+            from { transform: translate(-5%, -5%) rotate(0deg); }
+            to { transform: translate(5%, 5%) rotate(5deg); }
+        }
+
+        /* Pine Tree Silhouettes */
+        .forest {
+            position: absolute;
+            bottom: -20px;
+            left: 0;
+            width: 100%;
+            height: 200px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            opacity: 0.4;
+            filter: blur(1px);
+        }
+        .tree {
+            width: 0;
+            height: 0;
+            border-left: 40px solid transparent;
+            border-right: 40px solid transparent;
+            border-bottom: 120px solid #05070a;
+            position: relative;
+        }
+        .tree::before {
+            content: '';
+            position: absolute;
+            bottom: -150px;
+            left: -30px;
+            width: 0;
+            height: 0;
+            border-left: 30px solid transparent;
+            border-right: 30px solid transparent;
+            border-bottom: 100px solid #05070a;
+        }
+
+        /* Snow Animation */
+        .snow-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
         }
         .snow {
             position: absolute;
@@ -35,23 +123,45 @@
             background: white;
             border-radius: 50%;
             opacity: 0.8;
+            filter: blur(1px);
             animation: fall linear infinite;
         }
         @keyframes fall {
-            to {
-                transform: translateY(105vh);
-            }
+            0% { transform: translateY(-10px) translateX(0); }
+            100% { transform: translateY(105vh) translateX(20px); }
         }
-        /* Content Overlay to ensure readability */
+
+        /* Content Overlay */
         #root {
             position: relative;
             z-index: 1;
         }
-        /* Glassmorphism utility */
         .glass {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(12px);
+            background: rgba(10, 15, 25, 0.4);
+            backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        /* Hide number input spinners */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
         }
     </style>
 <script type="importmap">
@@ -66,22 +176,51 @@
 </script>
 </head>
 <body>
-    <div class="snow-container" id="snow-container"></div>
+    <div class="scene-container">
+        <div class="aurora"></div>
+        <div class="stars" id="star-container"></div>
+        <div class="forest" id="forest-container"></div>
+        <div class="snow-container" id="snow-container"></div>
+    </div>
     <div id="root"></div>
     <script>
-        // Generate snowflakes
-        const container = document.getElementById('snow-container');
+        // Generate Stars
+        const starContainer = document.getElementById('star-container');
+        for (let i = 0; i < 150; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            const size = Math.random() * 2 + 1 + 'px';
+            star.style.width = size;
+            star.style.height = size;
+            star.style.left = Math.random() * 100 + 'vw';
+            star.style.top = Math.random() * 100 + 'vh';
+            star.style.setProperty('--duration', Math.random() * 3 + 2 + 's');
+            starContainer.appendChild(star);
+        }
+
+        // Generate Forest
+        const forestContainer = document.getElementById('forest-container');
+        for (let i = 0; i < 15; i++) {
+            const tree = document.createElement('div');
+            tree.className = 'tree';
+            tree.style.transform = `scale(${Math.random() * 0.5 + 0.75})`;
+            tree.style.opacity = Math.random() * 0.3 + 0.3;
+            forestContainer.appendChild(tree);
+        }
+
+        // Generate Snowflakes
+        const snowContainer = document.getElementById('snow-container');
         for (let i = 0; i < 100; i++) {
             const snow = document.createElement('div');
             snow.className = 'snow';
-            const size = Math.random() * 3 + 2 + 'px';
+            const size = Math.random() * 4 + 2 + 'px';
             snow.style.width = size;
             snow.style.height = size;
             snow.style.left = Math.random() * 100 + 'vw';
-            snow.style.animationDuration = Math.random() * 3 + 7 + 's';
-            snow.style.animationDelay = Math.random() * 5 + 's';
-            snow.style.opacity = Math.random();
-            container.appendChild(snow);
+            snow.style.animationDuration = Math.random() * 4 + 6 + 's';
+            snow.style.animationDelay = Math.random() * 10 + 's';
+            snow.style.opacity = Math.random() * 0.5 + 0.3;
+            snowContainer.appendChild(snow);
         }
     </script>
 </body>

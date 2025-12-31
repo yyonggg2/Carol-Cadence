@@ -18,6 +18,13 @@ const INITIAL_STATE: AppState = {
   setupComplete: false
 };
 
+const formatHM = (totalMinutes: number) => {
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+};
+
 const App: React.FC = () => {
   const [state, setState] = useState<AppState>(INITIAL_STATE);
   const [currentDayIndex, setCurrentDayIndex] = useState(0);
@@ -97,6 +104,9 @@ const App: React.FC = () => {
         timeSpent: 10,
       },
 
+
+
+
       // ---------- SPRINT (2) ----------
       {
         id: 'sprint-workout',
@@ -129,7 +139,6 @@ const App: React.FC = () => {
         slotState === MentalState.FOCUS ? 'focus-missing' :
         slotState === MentalState.SOFT ? 'soft-avatar2' :
         'sprint-workout';
-
       return {
         dayIndex: i,
         isIntentional: isLit,
@@ -162,6 +171,7 @@ const App: React.FC = () => {
     setSelectedTask('');
     setReflection(null);
   };
+
 
   const advanceDemoChapter = () => {
     const hour = demoHour ?? new Date().getHours();
@@ -235,7 +245,6 @@ const App: React.FC = () => {
     }
   };
 
-  // Filter tasks based on selected mode
   const filteredTasks = useMemo(() => {
     if (!selectedMode) return [];
     return state.tasks.filter(t => t.category === selectedMode && !t.completed);
@@ -243,12 +252,12 @@ const App: React.FC = () => {
 
   if (!state.setupComplete) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-6 relative">
-        <div className="max-w-2xl w-full space-y-12 animate-fade-in text-center">
-          <header className="space-y-4">
-            <div className="text-amber-500 text-6xl mb-4">🕯️</div>
-            <h1 className="text-6xl font-bold text-white serif tracking-tight">Twelve Days</h1>
-            <p className="text-stone-400 italic text-lg max-w-md mx-auto">“A Partridge in a Pear Tree” begins the song of your intentions.</p>
+      <div className="min-h-screen flex flex-col items-center justify-center p-8 relative">
+        <div className="max-w-3xl w-full space-y-16 animate-fade-in text-center pb-20">
+          <header className="space-y-6">
+            <div className="text-amber-500 text-7xl mb-4 drop-shadow-[0_0_20px_rgba(245,158,11,0.3)]">🕯️</div>
+            <h1 className="text-7xl font-bold text-white serif tracking-tight">Christmas Cadence</h1>
+            <p className="text-stone-300 italic text-xl max-w-lg mx-auto opacity-90">An Intentional Holiday Assistant</p>
           </header>
 
           <TaskPool tasks={state.tasks} onAddTask={addTask} onRemoveTask={removeTask} />
@@ -257,10 +266,10 @@ const App: React.FC = () => {
             <button 
               disabled={state.tasks.length === 0}
               onClick={() => setState(prev => ({ ...prev, setupComplete: true }))}
-              className={`px-16 py-5 rounded-full font-bold tracking-[0.2em] transition-all shadow-2xl uppercase text-sm
+              className={`px-24 py-6 rounded-full font-bold tracking-[0.4em] transition-all shadow-2xl uppercase text-sm
                 ${state.tasks.length > 0 
-                  ? 'bg-amber-600 text-white hover:bg-amber-500 hover:scale-105 active:scale-95' 
-                  : 'bg-white/5 text-stone-600 cursor-not-allowed border border-white/5'
+                  ? 'bg-amber-600 text-white hover:bg-amber-500 hover:scale-105 active:scale-95 shadow-amber-900/40' 
+                  : 'bg-white/5 text-stone-700 cursor-not-allowed border border-white/5'
                 }`}
             >
               Begin the Journey
@@ -272,23 +281,26 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen pb-24 text-stone-200">
-      <header className="sticky top-0 z-40 bg-black/40 backdrop-blur-xl border-b border-white/5 px-6 py-5">
-        <div className="max-w-6xl mx-auto flex justify-between items-end">
-          <div>
-            <h1 className="text-2xl font-bold text-white serif">Day {currentDayIndex + 1}: {CAROL_VERSES[currentDayIndex]}</h1>
-            <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-amber-500/80">{currentChapter} Chapter</p>
+    <div className="min-h-screen pb-32 text-stone-200">
+      <header className="sticky top-0 z-40 bg-black/40 backdrop-blur-2xl border-b border-white/10 px-8 py-6">
+        <div className="max-w-6xl mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-6">
+            <div className="w-12 h-12 glass rounded-xl flex items-center justify-center text-2xl border-white/10">🕯️</div>
+            <div>
+              <h1 className="text-2xl font-bold text-white serif tracking-tight">Day {currentDayIndex + 1}: {CAROL_VERSES[currentDayIndex]}</h1>
+              <p className="text-[10px] uppercase tracking-[0.4em] font-bold text-amber-500/90">{currentChapter} Chapter</p>
+            </div>
           </div>
           <button 
             onClick={() => setState(prev => ({ ...prev, setupComplete: false }))}
-            className="text-[10px] font-bold text-stone-500 hover:text-stone-300 uppercase tracking-widest transition-colors"
+            className="px-6 py-2.5 text-[10px] font-bold text-stone-400 hover:text-white uppercase tracking-widest transition-all glass rounded-full border-white/10"
           >
-            Adjust Task Pool
+            Adjust Tasks
           </button>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 pt-8">
+      <main className="max-w-6xl mx-auto px-8 pt-10">
         <CandleDisplay days={state.days} currentDayIndex={currentDayIndex} />
 
         {state.currentSlot ? (
@@ -299,12 +311,12 @@ const App: React.FC = () => {
             onExitEarly={() => completeSlot(false)}
           />
         ) : (
-          <div className="max-w-4xl mx-auto mt-12 space-y-16">
+          <div className="max-w-4xl mx-auto mt-16 space-y-24">
             
-            {/* 1. Mode Selection */}
-            <section className="animate-fade-in">
-              <h3 className="text-xs font-bold uppercase tracking-[0.3em] text-stone-500 mb-8 text-center">First, choose your mental state</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* STEP 1: CHOOSE MODE */}
+            <section className="animate-fade-in text-center">
+              <h3 className="text-[11px] font-bold uppercase tracking-[0.5em] text-stone-500 mb-10">I. Choose your mental state</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {(Object.keys(STATE_CONFIG) as MentalState[]).map(mode => {
                   const cfg = STATE_CONFIG[mode];
                   const isSelected = selectedMode === mode;
@@ -315,35 +327,39 @@ const App: React.FC = () => {
                         setSelectedMode(mode);
                         setSelectedTask('');
                       }}
-                      className={`p-8 rounded-2xl border-2 text-center transition-all group glass
+                      className={`p-10 rounded-[2.5rem] border-2 text-center transition-all group glass
                         ${isSelected 
-                          ? 'border-amber-500 bg-amber-500/10 scale-[1.05] ring-4 ring-amber-500/5' 
+                          ? 'border-amber-500 bg-amber-500/10 scale-[1.05] ring-8 ring-amber-500/5 shadow-2xl' 
                           : 'border-white/5 hover:border-white/20'}
                       `}
                     >
-                      <div className="text-4xl mb-4 grayscale group-hover:grayscale-0 transition-all">{cfg.icon}</div>
-                      <div className={`font-bold text-xl serif mb-2 ${isSelected ? 'text-white' : 'text-stone-400'}`}>{cfg.label}</div>
-                      <p className="text-xs text-stone-500 leading-relaxed">{cfg.description}</p>
+                      <div className="text-5xl mb-6 grayscale-50 group-hover:grayscale-0 transition-all drop-shadow-lg">{cfg.icon}</div>
+                      <div className={`font-bold text-2xl serif mb-3 ${isSelected ? 'text-white' : 'text-stone-400'}`}>{cfg.label}</div>
+                      <p className="text-xs text-stone-500 leading-relaxed max-w-[160px] mx-auto italic">"{cfg.description}"</p>
                     </button>
                   );
                 })}
               </div>
             </section>
 
-            {/* 2. Task Selection (Visible only after mode selected) */}
+            {/* STEP 2: CHOOSE TASK (Visible only after mode selected) */}
             {selectedMode && (
-              <section className="animate-fade-in space-y-8 pb-12">
-                <div className="h-px bg-white/5 w-1/3 mx-auto" />
-                <h3 className="text-xs font-bold uppercase tracking-[0.3em] text-stone-500 mb-8 text-center">Then, select a task for {STATE_CONFIG[selectedMode].label}</h3>
-                <div className="grid grid-cols-1 gap-4 max-w-2xl mx-auto">
+              <section className="animate-in fade-in zoom-in duration-500 space-y-12 pb-20">
+                <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent w-full" />
+                <div className="text-center">
+                    <h3 className="text-[11px] font-bold uppercase tracking-[0.5em] text-stone-500 mb-4">II. Select a verse for {STATE_CONFIG[selectedMode].label}</h3>
+                    <p className="text-xs text-stone-600 italic">Singing the song of your focus...</p>
+                </div>
+                
+                <div className="grid grid-cols-1 gap-5 max-w-2xl mx-auto">
                   {filteredTasks.length === 0 ? (
-                    <div className="text-center p-12 glass rounded-2xl border-dashed border-2 border-white/5">
-                        <p className="text-stone-500 italic mb-4">No tasks found in your pool for this mode.</p>
+                    <div className="text-center p-16 glass rounded-[2.5rem] border-dashed border-2 border-white/10">
+                        <p className="text-stone-500 italic mb-6">Your library has no verses prepared for this state.</p>
                         <button 
                             onClick={() => setState(prev => ({ ...prev, setupComplete: false }))}
-                            className="text-amber-500 text-xs font-bold uppercase tracking-widest"
+                            className="px-8 py-3 bg-white/5 text-amber-500 text-[10px] font-bold uppercase tracking-widest rounded-full border border-amber-500/20 hover:bg-amber-500/10 transition-all"
                         >
-                            + Add Verses to {STATE_CONFIG[selectedMode].label}
+                            + Add to {STATE_CONFIG[selectedMode].label}
                         </button>
                     </div>
                   ) : (
@@ -351,66 +367,64 @@ const App: React.FC = () => {
                       <button 
                         key={task.id}
                         onClick={() => setSelectedTask(task.id)}
-                        className={`flex items-center justify-between p-6 rounded-2xl border transition-all glass
+                        className={`flex items-center justify-between p-8 rounded-[2rem] border transition-all glass group
                           ${selectedTask === task.id 
-                            ? 'border-amber-500/40 bg-amber-500/5' 
+                            ? 'border-amber-500/40 bg-amber-500/5 shadow-xl' 
                             : 'border-white/5 hover:border-white/10'}
                         `}
                       >
-                        <div className="text-left">
-                          <div className="font-medium text-lg text-stone-200">{task.name}</div>
-                          <div className="mt-2 space-y-2">
-                            <div className="flex justify-between text-[10px] uppercase tracking-widest text-stone-500">
-                              <span>Progress</span>
-                              <span>{task.timeSpent} / {task.estimatedMinutes} mins</span>
+                        <div className="text-left flex-1">
+                          <div className={`font-semibold text-2xl serif transition-colors ${selectedTask === task.id ? 'text-white' : 'text-stone-300'}`}>{task.name}</div>
+                          <div className="mt-4 space-y-3">
+                            <div className="flex justify-between text-[10px] uppercase tracking-[0.3em] text-stone-500 font-bold">
+                              <span>SINGING PROGRESS</span>
+                              <span>{formatHM(task.timeSpent)} / {formatHM(task.estimatedMinutes)}</span>
                             </div>
-
                             {(() => {
                               const pct = Math.min(100, Math.round((task.timeSpent / Math.max(1, task.estimatedMinutes)) * 100));
                               return (
                                 <div className="h-2 rounded-full bg-white/10 overflow-hidden">
                                   <div
-                                    className="h-full rounded-full bg-amber-400 shadow-[0_0_18px_rgba(251,191,36,0.55)] transition-all"
+                                    className="h-full rounded-full bg-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.6)] transition-all duration-700"
                                     style={{ width: `${pct}%` }}
                                   />
                                 </div>
                               );
                             })()}
                           </div>
-
                         </div>
-                        <div className={`w-6 h-6 rounded-full border flex items-center justify-center transition-all
-                            ${selectedTask === task.id ? 'bg-amber-500 border-amber-500' : 'border-white/10'}
+                        <div className={`ml-8 w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all
+                            ${selectedTask === task.id ? 'bg-amber-500 border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.4)]' : 'border-white/10 group-hover:border-white/30'}
                         `}>
-                            {selectedTask === task.id && <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
+                            {selectedTask === task.id && <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
                         </div>
                       </button>
                     ))
                   )}
                 </div>
 
-                {/* 3. Final Start Button */}
+                {/* STEP 3: START */}
                 {selectedTask && (
-                    <div className="pt-8 flex justify-center animate-fade-in">
+                    <div className="pt-12 flex justify-center animate-fade-in">
                         <button 
                             onClick={startSlot}
-                            className="px-20 py-5 rounded-full bg-white text-stone-900 font-bold tracking-[0.3em] transition-all shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:scale-105 active:scale-95 uppercase text-xs"
+                            className="px-24 py-7 rounded-full bg-white text-stone-900 font-bold tracking-[0.5em] transition-all shadow-[0_0_50px_rgba(255,255,255,0.2)] hover:scale-105 active:scale-95 uppercase text-xs"
                         >
-                            Start the Verse
+                            Begin the Verse
                         </button>
                     </div>
                 )}
               </section>
             )}
 
-            {/* Reflection Overlay */}
+            {/* Reflection Notification */}
             {reflection && (
-                <div className="fixed bottom-12 right-12 max-w-sm glass p-6 rounded-2xl border-l-4 border-amber-500 shadow-2xl animate-fade-in z-50">
-                    <h4 className="text-amber-500 text-[10px] font-bold uppercase tracking-widest mb-2">Reflections from the Hearth</h4>
-                    <p className="text-stone-300 text-sm italic serif leading-relaxed">"{reflection}"</p>
+                <div className="fixed bottom-12 right-12 max-w-sm glass p-8 rounded-3xl border-l-4 border-amber-500 shadow-[0_30px_60px_rgba(0,0,0,0.5)] animate-fade-in z-50">
+                    <h4 className="text-amber-500 text-[10px] font-bold uppercase tracking-[0.4em] mb-3">Reflections from the Hearth</h4>
+                    <p className="text-stone-300 text-lg italic serif leading-relaxed">"{reflection}"</p>
                     <button 
                         onClick={() => setReflection(null)}
-                        className="mt-4 text-[10px] text-stone-500 hover:text-white uppercase tracking-widest font-bold"
+                        className="mt-6 text-[10px] text-stone-500 hover:text-white uppercase tracking-widest font-bold transition-colors"
                     >
                         Dismiss
                     </button>
@@ -420,48 +434,41 @@ const App: React.FC = () => {
         )}
       </main>
 
-      {/* Entry Friction Modal */}
+      {/* Confirmation Friction Modal */}
       {showEntryFriction && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
-          <div className="glass p-12 rounded-3xl max-w-md w-full shadow-2xl text-center border border-white/10">
-            <div className="text-6xl mb-8 animate-pulse">🕯️</div>
-            <h3 className="text-3xl font-bold serif mb-6 text-white">Ready to begin?</h3>
-            <p className="text-stone-400 mb-12 leading-relaxed italic text-lg">
-              "You’re about to begin this verse. Are you ready to stay with it for a while?"
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-3xl flex items-center justify-center p-8 z-50">
+          <div className="glass p-16 rounded-[3rem] max-w-xl w-full shadow-2xl text-center border border-white/20">
+            <div className="text-8xl mb-10 animate-pulse drop-shadow-[0_0_25px_rgba(245,158,11,0.5)]">🕯️</div>
+            <h3 className="text-4xl font-bold serif mb-8 text-white tracking-tight">Are you ready to stay?</h3>
+            <p className="text-stone-400 mb-16 leading-relaxed italic text-xl">
+              "This verse requires your presence. Take a deep breath and prepare to sing your intention."
             </p>
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-5">
               <button 
                 onClick={confirmStartSlot}
-                className="w-full py-5 bg-amber-600 text-white rounded-xl hover:bg-amber-500 font-bold tracking-[0.2em] transition-all active:scale-95 uppercase text-xs"
+                className="w-full py-6 bg-amber-600 text-white rounded-2xl hover:bg-amber-500 font-bold tracking-[0.4em] transition-all active:scale-95 uppercase text-sm shadow-xl shadow-amber-950/40"
               >
-                Yes, I am present
+                I am present
               </button>
               <button 
                 onClick={() => setShowEntryFriction(false)}
-                className="w-full py-3 text-stone-600 hover:text-stone-400 text-[10px] font-bold uppercase tracking-widest transition-colors"
+                className="w-full py-4 text-stone-600 hover:text-stone-300 text-[11px] font-bold uppercase tracking-[0.3em] transition-colors"
               >
-                Wait, I need a moment
+                I need a moment more
               </button>
             </div>
           </div>
         </div>
       )}
       
-      {/* Simulation Trigger (Visible only in non-active slot) */}
+      {/* Simulation Trigger */}
       {!state.currentSlot && (
-        <div className="fixed bottom-8 left-8 flex gap-3">
-          <button
-            onClick={() => setCurrentDayIndex(prev => (prev + 1) % TOTAL_DAYS)}
-            className="px-4 py-2 text-stone-600 hover:text-stone-400 text-[9px] uppercase font-bold tracking-[0.3em] glass rounded-full"
-          >
-            Next Day
-          </button>
-
+        <div className="fixed bottom-10 left-10">
           <button
             onClick={advanceDemoChapter}
             className="px-4 py-2 text-stone-600 hover:text-stone-400 text-[9px] uppercase font-bold tracking-[0.3em] glass rounded-full"
           >
-            Next Chapter
+            Next Chapter Demo
           </button>
 
           <button
@@ -470,12 +477,10 @@ const App: React.FC = () => {
           >
             Seed Demo
           </button>
-
         </div>
       )}
     </div>
   );
 };
-
 
 export default App;
